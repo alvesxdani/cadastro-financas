@@ -1,6 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { FileDown, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 import TransacaoForm from "./components/TransacaoForm";
 import TransacaoList from "./components/TransacaoList";
 import FiltrosComp from "./components/Filtros";
@@ -21,6 +31,7 @@ export default function Home() {
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [carregado, setCarregado] = useState(false);
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_INICIAIS);
+  const [drawerAberto, setDrawerAberto] = useState(false);
 
   useEffect(() => {
     setTransacoes(carregar());
@@ -33,6 +44,7 @@ export default function Home() {
 
   function adicionar(novas: Transacao[]) {
     setTransacoes((lista) => [...novas, ...lista]);
+    setDrawerAberto(false);
   }
 
   function remover(id: string) {
@@ -58,45 +70,68 @@ export default function Home() {
   }, [transacoes, filtros]);
 
   return (
-    <div className="min-h-full bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-full bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        <header className="flex items-center justify-between gap-4 flex-wrap">
+
+        <header className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Cadastro de Financas</h1>
-            <p className="text-sm text-zinc-500">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Cadastro de Financas
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
               Controle entradas, saidas e divisoes de contas.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => exportarPDF(filtradas)}
-            disabled={filtradas.length === 0}
-            className="rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 px-4 py-2 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90"
-          >
-            Exportar PDF
-          </button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => exportarPDF(filtradas)}
+              disabled={filtradas.length === 0}
+              className="gap-2"
+            >
+              <FileDown className="size-4" data-icon="inline-start" />
+              Exportar PDF
+            </Button>
+            <Button onClick={() => setDrawerAberto(true)} className="gap-2">
+              <Plus className="size-4" data-icon="inline-start" />
+              Nova transacao
+            </Button>
+          </div>
         </header>
 
         <Resumo transacoes={filtradas} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6">
-          <TransacaoForm onSalvar={adicionar} />
+        <Separator />
 
-          <div className="space-y-4">
-            <FiltrosComp
-              filtros={filtros}
-              onChange={setFiltros}
-              categorias={categorias}
-            />
-            <div>
-              <div className="text-xs text-zinc-500 mb-2">
-                {filtradas.length} de {transacoes.length} transacoes
-              </div>
-              <TransacaoList transacoes={filtradas} onRemover={remover} />
-            </div>
+        <div className="flex flex-col gap-4">
+          <FiltrosComp
+            filtros={filtros}
+            onChange={setFiltros}
+            categorias={categorias}
+          />
+          <div>
+            <p className="text-xs text-muted-foreground mb-3 px-0.5">
+              {filtradas.length} de {transacoes.length} transacoes
+            </p>
+            <TransacaoList transacoes={filtradas} onRemover={remover} />
           </div>
         </div>
+
       </div>
+
+      <Drawer open={drawerAberto} onOpenChange={setDrawerAberto} direction="right">
+        <DrawerContent className="w-full max-w-md ml-auto h-full flex flex-col rounded-none">
+          <DrawerHeader className="border-b border-border/60 pb-4">
+            <DrawerTitle>Nova transacao</DrawerTitle>
+            <DrawerDescription>
+              Preencha os dados para registrar uma entrada ou saida.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="flex-1 overflow-y-auto p-4">
+            <TransacaoForm onSalvar={adicionar} hideTitle />
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
