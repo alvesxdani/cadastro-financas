@@ -1,78 +1,78 @@
-"use client";
+'use client'
 
-import { useEffect, useMemo, useState } from "react";
-import { FileDown, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import { Button } from '@/components/ui/button'
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
-} from "@/components/ui/drawer";
-import TransacaoForm from "./components/TransacaoForm";
-import TransacaoList from "./components/TransacaoList";
-import FiltrosComp from "./components/Filtros";
-import Resumo from "./components/Resumo";
-import type { Filtros, Transacao } from "./lib/types";
-import { carregar, salvar } from "./lib/storage";
-import { exportarPDF } from "./lib/pdf";
+} from '@/components/ui/drawer'
+import { Separator } from '@/components/ui/separator'
+import { FileDown, Plus, X } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import FiltrosComp from './components/Filtros'
+import Resumo from './components/Resumo'
+import TransacaoForm from './components/TransacaoForm'
+import TransacaoList from './components/TransacaoList'
+import { exportarPDF } from './lib/pdf'
+import { carregar, salvar } from './lib/storage'
+import type { Filtros, Transacao } from './lib/types'
 
 const FILTROS_INICIAIS: Filtros = {
-  dataInicio: "",
-  dataFim: "",
-  tipo: "",
-  categoria: "",
-  busca: "",
-};
+  dataInicio: '',
+  dataFim: '',
+  tipo: '',
+  categoria: '',
+  busca: '',
+}
 
 export default function Home() {
-  const [transacoes, setTransacoes] = useState<Transacao[]>([]);
-  const [carregado, setCarregado] = useState(false);
-  const [filtros, setFiltros] = useState<Filtros>(FILTROS_INICIAIS);
-  const [drawerAberto, setDrawerAberto] = useState(false);
+  const [transacoes, setTransacoes] = useState<Transacao[]>([])
+  const [carregado, setCarregado] = useState(false)
+  const [filtros, setFiltros] = useState<Filtros>(FILTROS_INICIAIS)
+  const [drawerAberto, setDrawerAberto] = useState(false)
 
   useEffect(() => {
-    setTransacoes(carregar());
-    setCarregado(true);
-  }, []);
+    setTransacoes(carregar())
+    setCarregado(true)
+  }, [])
 
   useEffect(() => {
-    if (carregado) salvar(transacoes);
-  }, [transacoes, carregado]);
+    if (carregado) salvar(transacoes)
+  }, [transacoes, carregado])
 
   function adicionar(novas: Transacao[]) {
-    setTransacoes((lista) => [...novas, ...lista]);
-    setDrawerAberto(false);
+    setTransacoes((lista) => [...novas, ...lista])
+    setDrawerAberto(false)
   }
 
   function remover(id: string) {
-    setTransacoes((lista) => lista.filter((t) => t.id !== id));
+    setTransacoes((lista) => lista.filter((t) => t.id !== id))
   }
 
   const categorias = useMemo(() => {
-    return Array.from(new Set(transacoes.map((t) => t.categoria))).sort();
-  }, [transacoes]);
+    return Array.from(new Set(transacoes.map((t) => t.categoria))).sort()
+  }, [transacoes])
 
   const filtradas = useMemo(() => {
-    const busca = filtros.busca.trim().toLowerCase();
+    const busca = filtros.busca.trim().toLowerCase()
     return transacoes
       .filter((t) => {
-        if (filtros.dataInicio && t.data < filtros.dataInicio) return false;
-        if (filtros.dataFim && t.data > filtros.dataFim) return false;
-        if (filtros.tipo && t.tipo !== filtros.tipo) return false;
-        if (filtros.categoria && t.categoria !== filtros.categoria) return false;
-        if (busca && !t.descricao.toLowerCase().includes(busca)) return false;
-        return true;
+        if (filtros.dataInicio && t.data < filtros.dataInicio) return false
+        if (filtros.dataFim && t.data > filtros.dataFim) return false
+        if (filtros.tipo && t.tipo !== filtros.tipo) return false
+        if (filtros.categoria && t.categoria !== filtros.categoria) return false
+        if (busca && !t.descricao.toLowerCase().includes(busca)) return false
+        return true
       })
-      .sort((a, b) => (a.data < b.data ? 1 : a.data > b.data ? -1 : 0));
-  }, [transacoes, filtros]);
+      .sort((a, b) => (a.data < b.data ? 1 : a.data > b.data ? -1 : 0))
+  }, [transacoes, filtros])
 
   return (
     <div className="min-h-full bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-
         <header className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -116,13 +116,24 @@ export default function Home() {
             <TransacaoList transacoes={filtradas} onRemover={remover} />
           </div>
         </div>
-
       </div>
 
-      <Drawer open={drawerAberto} onOpenChange={setDrawerAberto} direction="right">
-        <DrawerContent className="w-full max-w-md ml-auto h-full flex flex-col rounded-none">
+      <Drawer
+        open={drawerAberto}
+        onOpenChange={setDrawerAberto}
+        direction="right"
+      >
+        <DrawerContent side="right" className="flex flex-col">
           <DrawerHeader className="border-b border-border/60 pb-4">
-            <DrawerTitle>Nova transacao</DrawerTitle>
+            <div className="flex items-center justify-between">
+              <DrawerTitle>Nova transacao</DrawerTitle>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon-sm">
+                  <X className="size-4" />
+                  <span className="sr-only">Fechar</span>
+                </Button>
+              </DrawerClose>
+            </div>
             <DrawerDescription>
               Preencha os dados para registrar uma entrada ou saida.
             </DrawerDescription>
@@ -133,5 +144,5 @@ export default function Home() {
         </DrawerContent>
       </Drawer>
     </div>
-  );
+  )
 }

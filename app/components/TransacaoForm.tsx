@@ -188,16 +188,9 @@ export default function TransacaoForm({ onSalvar, hideTitle }: Props) {
     reset();
   }
 
-  return (
-    <Card className={hideTitle ? "border-0 shadow-none" : "border-border/60"}>
-      {!hideTitle && (
-        <CardHeader className="pb-4">
-          <CardTitle className="text-base">Nova transacao</CardTitle>
-        </CardHeader>
-      )}
-      <CardContent className={hideTitle ? "px-0 pt-0" : "pt-0"}>
-        <form onSubmit={submit} className="space-y-5">
-          {/* Tipo */}
+  const formBody = (
+    <form onSubmit={submit} className="space-y-5">
+      {/* Tipo */}
           <div className="grid grid-cols-2 gap-2 p-1 bg-muted rounded-xl">
             <button
               type="button"
@@ -413,7 +406,16 @@ export default function TransacaoForm({ onSalvar, hideTitle }: Props) {
             Salvar transacao
           </Button>
         </form>
-      </CardContent>
+  );
+
+  if (hideTitle) return formBody;
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-base">Nova transacao</CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">{formBody}</CardContent>
     </Card>
   );
 }
